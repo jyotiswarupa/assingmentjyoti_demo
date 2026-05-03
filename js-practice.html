@@ -1,0 +1,110 @@
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JavaScript Practice Project</title>
+  <style>
+    body { font-family: Arial; text-align: center; }
+    input, button { margin: 5px; padding: 8px; }
+    li { cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>JavaScript Practice Project</h1>
+
+  <!-- 🔹 Form Validation -->
+  <h2>Form Validation</h2>
+  <input type="text" id="name" placeholder="Enter Name"><br>
+  <input type="text" id="phone" placeholder="Enter 10-digit Phone"><br>
+  <button onclick="validateForm()">Submit</button>
+
+  <p id="formMsg"></p>
+
+  <!-- 🔹 Counter App -->
+  <h2>Counter App</h2>
+  <h3 id="count">0</h3>
+  <button onclick="increment()">+</button>
+  <button onclick="decrement()">-</button>
+  <button onclick="reset()">Reset</button>
+
+  <!-- 🔹 To-Do List -->
+  <h2>To-Do List</h2>
+  <input type="text" id="taskInput" placeholder="Enter task">
+  <button onclick="addTask()">Add Task</button>
+
+  <ul id="taskList"></ul>
+
+<script>
+  // 🔹 Form Validation
+  function validateForm() {
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
+    const msg = document.getElementById("formMsg");
+
+    if (name === "") {
+      msg.innerText = "Name cannot be empty";
+      msg.style.color = "red";
+      return;
+    }
+
+    if (!/^\\d{10}$/.test(phone)) {
+      msg.innerText = "Phone must be 10 digits";
+      msg.style.color = "red";
+      return;
+    }
+
+    msg.innerText = "Form submitted successfully!";
+    msg.style.color = "green";
+  }
+
+  // 🔹 Counter App
+  let count = 0;
+
+  function increment() {
+    count++;
+    document.getElementById("count").innerText = count;
+  }
+
+  function decrement() {
+    count--;
+    document.getElementById("count").innerText = count;
+  }
+
+  function reset() {
+    count = 0;
+    document.getElementById("count").innerText = count;
+  }
+
+  // 🔹 To-Do List
+  function addTask() {
+    const taskInput = document.getElementById("taskInput");
+    const taskText = taskInput.value;
+
+    if (taskText === "") {
+      alert("Enter a task!");
+      return;
+    }
+
+    const li = document.createElement("li");
+    li.innerText = taskText;
+
+    // Mark complete on click
+    li.onclick = function () {
+      li.style.textDecoration = "line-through";
+    };
+
+    // Remove on double click
+    li.ondblclick = function () {
+      li.remove();
+    };
+
+    document.getElementById("taskList").appendChild(li);
+
+    taskInput.value = "";
+  }
+</script>
+
+</body>
+</html>
+```
