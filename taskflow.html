@@ -1,0 +1,236 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TaskFlow Lite</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+    }
+
+    .container {
+      width: 400px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+    }
+
+    button {
+      padding: 10px;
+      cursor: pointer;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin-top: 10px;
+      background: #eee;
+      border-radius: 5px;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+
+    .actions button {
+      margin-left: 5px;
+      background: #6c757d;
+    }
+
+    .actions button.delete {
+      background: #dc3545;
+    }
+
+    .actions button.edit {
+      background: #ffc107;
+      color: black;
+    }
+
+    .actions button.toggle {
+      background: #28a745;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>TaskFlow Lite</h1>
+
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Enter task..." required>
+      <button type="submit">Add</button>
+    </form>
+
+    <ul id="task-list"></ul>
+  </div>
+
+  <script>
+    // =======================
+    // MODEL
+    // =======================
+    const TaskModel = (() => {
+      let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+      const save = () => {
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+      };
+
+      return {
+        getTasks: () => tasks,
+
+        addTask: (text) => {
+          const newTask = {
+            id: Date.now(),
+            text,
+            completed: false
+          };
+          tasks.push(newTask);
+          save();
+        },
+
+        deleteTask: (id) => {
+          tasks = tasks.filter(task => task.id !== id);
+          save();
+        },
+
+        toggleTask: (id) => {
+          tasks = tasks.map(task =>
+            task.id === id ? { ...task, completed: !task.completed } : task
+          );
+          save();
+        },
+
+        updateTask: (id, newText) => {
+          tasks = tasks.map(task =>
+            task.id === id ? { ...task, text: newText } : task
+          );
+          save();
+        }
+      };
+    })();
+
+    // =======================
+    // VIEW
+    // =======================
+    const TaskView = (() => {
+      const taskList = document.getElementById("task-list");
+
+      const render = (tasks) => {
+        taskList.innerHTML = "";
+
+        tasks.forEach(task => {
+          const li = document.createElement("li");
+
+          li.innerHTML = `
+            <span class="${task.completed ? "completed" : ""}">
+              ${task.text}
+            </span>
+            <div class="actions">
+              <button data-id="${task.id}" class="toggle">✔</button>
+              <button data-id="${task.id}" class="edit">✏</button>
+              <button data-id="${task.id}" class="delete">❌</button>
+            </div>
+          `;
+
+          taskList.appendChild(li);
+        });
+      };
+
+      return { render };
+    })();
+
+    // =======================
+    // CONTROLLER
+    // =======================
+    const TaskController = (() => {
+      const form = document.getElementById("task-form");
+      const input = document.getElementById("task-input");
+      const taskList = document.getElementById("task-list");
+
+      const init = () => {
+        TaskView.render(TaskModel.getTasks());
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const text = input.value.trim();
+
+          if (text === "") {
+            alert("Task cannot be empty!");
+            return;
+          }
+
+          TaskModel.addTask(text);
+          input.value = "";
+          TaskView.render(TaskModel.getTasks());
+        });
+
+        taskList.addEventListener("click", (e) => {
+          const id = Number(e.target.dataset.id);
+
+          if (e.target.classList.contains("delete")) {
+            TaskModel.deleteTask(id);
+          }
+
+          if (e.target.classList.contains("toggle")) {
+            TaskModel.toggleTask(id);
+          }
+
+          if (e.target.classList.contains("edit")) {
+            const newText = prompt("Edit task:");
+            if (newText && newText.trim() !== "") {
+              TaskModel.updateTask(id, newText.trim());
+            }
+          }
+
+          TaskView.render(TaskModel.getTasks());
+        });
+      };
+
+      return { init };
+    })();
+
+    // =======================
+    // INIT
+    // =======================
+    TaskController.init();
+  </script>
+
+</body>
+</html>
+```
